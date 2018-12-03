@@ -1,7 +1,7 @@
 const _ = require('lodash');
 const Promise = require('bluebird')
 
-const axios = require("axios")
+const http = require("axios")
 const events = require("./lib/events")
 const config = require("./config")
 const time = require("./lib/cron")
@@ -33,13 +33,17 @@ class PublicBus{
   setupTimers(){
     require("./lib/cron")(this.eventEmitter,"first_stop", this.config.firststop_cron)
     require("./lib/cron")(this.eventEmitter,"next_stop", this.config.nextstop_cron)
-    require("./lib/cloud")(this.eventEmitter)
+    //require("./lib/cloud")(this.eventEmitter)
   }
   currentBusesQuery({event}){
     return Promise.map(Object.keys(this.stops), (service)=>{
       return this.query(this.stops[service])
     },{concurrency: 5})
     .then((stops)=> _.flatten(stops))
+    .then((stops)=>{
+      console.log(stops.length+" buses CURRENT in operation")
+      return stops
+    })
     .then((stops)=> extract(this, stops, event))
   }
   updateBus(newBuses){
@@ -49,15 +53,23 @@ class PublicBus{
         busesNoOrigin.push(newBus)
       }else{
         var originalBusIndex = _.findIndex(this.currentBuses, (currentBus)=> currentBus['bus_id'] == newBus['originBus']['bus_id'])
+
         if(originalBusIndex == -1){
+          delete newBus['originBus']
+          console.log("could not find originalBusIndex for", newBus)
           busesNoOrigin.push(newBus)
         }else{
+          newBus['bus_id'] = newBus['originBus']['bus_id']
+
+          console.log("bus id "+newBus['bus_id']+" : "+newBus['ServiceNo']+" "+newBus['originBus']['StopIndex']+"-> "+newBus['StopIndex'], newBus['originBus']['EstimatedArrival'], " -> ",newBus['EstimatedArrival'])
+          delete newBus['originBus']
           this.currentBuses[originalBusIndex] = newBus
         }
       }
     })
+    console.log("replaced")
     if(busesNoOrigin.length > 0){
-      console.log(busesNoOrigin.length, " buses have no origin")
+      console.log(busesNoOrigin.length, " buses have no origin ",busesNoOrigin)
       this.eventEmitter.emit("add_bus", busesNoOrigin)
     }
   }
@@ -67,6 +79,7 @@ class PublicBus{
       newStop['bus_id'] = require('crypto').randomBytes(8).toString('hex')
       this.currentBuses.push(newStop)
     })
+    console.log(this.currentBuses.length+" new length after added bus")
   }
   firstStopQuery({event}){
     return this.query(this.firstStops)
@@ -86,15 +99,19 @@ class PublicBus{
         return [currentBusStop, nextBusStop]
       }
     })
-    console.log("called with", stopsToFetch.length)
+    stopsToFetch = _.flatten(stopsToFetch)
     return this.query(stopsToFetch)
     .then((stops)=> extract(this, stops, event))
   }
   query(stops){
     return Promise.map(stops, (stop, index)=>{
-      return axios({
-        url: config.api_url+"BusArrivalv2?BusStopCode="+stop['BusStopCode']+"&ServiceNo="+stop['ServiceNo'],
+      return http({
+        url: config.api_url+"BusArrivalv2",
         method: "GET",
+        params: {
+          BusStopCode: stop['BusStopCode'],
+          ServiceNo: stop['ServiceNo']
+        },
         headers: {
           "Content-Type": "application/json",
           AccountKey: this.config.AccountKey
@@ -124,6 +141,7 @@ class PublicBus{
     .then(data => _.filter(data))
     .then(data=> _.groupBy(data, (item)=> item['Latitude']+","+item['Longitude']))
     .then((data)=> _.map(data, (value, key)=> value[0]))
+    .catch((err)=> console.log(err))
   }
 }
 module.exports = PublicBus
