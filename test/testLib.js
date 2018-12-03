@@ -4,7 +4,7 @@ var EventEmitter = require("events");
 var sinon = require("sinon")
 describe("Test libraries",function () {
   describe("Test CSV Reader",function () {
-    it("Test CSV Files SUCCESS",function () {
+    it("Expect file read to succeed with valid csv file",function () {
       var reader = require("../lib/reader")
       var contents = reader("./test/sample/sampleCsv.csv")
       expect(contents).to.be.not.null
@@ -13,28 +13,28 @@ describe("Test libraries",function () {
         expect(Object.keys(content)).to.have.members(['TestHeader1', 'TestHeader2'])
       })
     })
-  })
-  describe("Test events",function () {
-    it("Test Events able to be called using event emitter",function () {
-      var events = require("../lib/events")
-      expect(events()).to.be.instanceof(EventEmitter)
+    it("Expect file read to fail with return error with invalid csv file",function () {
+      var reader = require("../lib/reader")
+      var contents = reader("./test/sample/sampleCsv222.csv")
+      expect(contents).to.be.not.null
+      expect(contents).to.be.instanceof(Error)
     })
   })
-  describe("Test scheduler",function (cb) {
-    it("Test event able to be called given event emitter", function () {
+  describe("Test scheduler",function () {
+    it("Expect cron to be working properly, call event given cron text to call it",(cb)=>{
       var eventEmitter = new EventEmitter();
       var cron = require("../lib/cron");
       cron(eventEmitter, "test_event", "* * * * * *")
       var fake = sinon.fake()
       eventEmitter.on("test_event", fake)
-      setTimeout(function () {
+      setTimeout(()=>{
         expect(fake.callCount).to.be.equal(1)
         cb()
-      }, 1001)
+      }, 1000)
     })
   })
   describe("Test time", function () {
-    it("Test time functionality",function () {
+    it("Expect time to parse text properly",function () {
       var time = require("../lib/time")
       expect(time).to.be.a('object')
       expect(time.now).to.be.a('function')

@@ -1,19 +1,54 @@
 var expect = require("chai").expect;
-var EventEmitter = require("events");
-var axios = require("axios")
-var MockAdapter = require('axios-mock-adapter');
-var mock = new MockAdapter(axios);
 var sinon = require("sinon")
-describe("Test Public crawl functionality",function () {
-  describe("Test functional logic", function () {
-    it("Test listeners",(done)=>{
-      mock.onGet().reply(function (config) {
-        console.log(config)
-        return [200, []]
+var Promise = require('bluebird')
+var mock = require("mock-require")
+describe("Test Fetch buses functionality",()=>{
+  describe("Test extract buses logic", ()=>{
+    
+  })
+  describe("Test Logic in handling data",()=>{
+    it("Expect buses with invalid Latitude and Longitude to not go through",(done)=>{
+      mock('axios', (options)=>{
+        return new Promise(function (resolve, reject) {
+          var content = require("fs").readFileSync("./test/sample/sample_bus.json").toString()
+          content = JSON.parse(content)
+          content['Services'] = content['Services'].map(function (service) {
+            service['NextBus']['Latitude'] = '0'
+            service['NextBus']['Longitude'] = '0'
+            return service
+          })
+          resolve({data: content})
+        })
       })
-      var Public = require("../public")
-      var _public = new Public()
-      
+
+      var PublicEmitter = require("../public")
+      var config = require("../config")
+      config['notTimed'] = true
+      var _public = new PublicEmitter(config, {})
+
+      _public.query(_public.firstStops).then((buses)=>{
+        expect(buses.length).to.be.equal(0)
+        done();
+      })
+    })
+    it("Expect buses with valid Latitude and Longitude to go through",(done)=>{
+      var PublicEmitter = require("../public")
+      var config = require("../config")
+      config['notTimed'] = true
+      var _public = new PublicEmitter(config, {})
+      _public.query(_public.firstStops).then((buses)=>{
+        buses.forEach((bus)=>{
+          expect(bus).to.be.an('object')
+          expect(bus).to.include.keys(['BusStopCode'])
+          expect(bus).to.include.keys(['ServiceNo'])
+          expect(bus).to.include.keys(['StopIndex'])
+        })
+        done();
+      })
+    })
+
+    afterEach(function () {
+      mock.stop('axios')
     })
   })
 })
