@@ -13,7 +13,9 @@ Currently, the Datamall API does not allow the querying of bus services based on
 
 # In Progress
  - Complete test code
- - Add refresh every 5mins for buses to get a clean slate
+
+# Requirements
+  - Obtain bus route from
 
 # Usage
 ```
@@ -32,6 +34,7 @@ bus.events.on("added_buses", function(buses){
 |------|-------------|
 |add_buses & added_buses| New bus on route|
 |update_buses & updated_buses| Previous bus has been updated in the journey|
-|first_stop|Time to query first stop status for new bus|
-|next_stop|Time to query next stop status for all current buses|
-|replace_all|When current buses are refreshed but current buses is not empty(not used yet)|
+|first_stop|Triggered by cron, query first stop status for new bus|
+|next_stop|Triggered by cron, query next stop status for all current buses|
+|current_stops|Triggered by cron, query all bus stops, will trigger clear_current|
+|clear_current|When current buses are refreshed but current buses is not empty|

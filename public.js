@@ -7,20 +7,12 @@ const extract = require("./lib/extract");
 const fs = require("fs")
 class PublicBus{
   constructor(options, events){
+    this.config = options
     if(!events){
       var EventEmitter = require("events")
       this.events = new EventEmitter()
     }
     this.events = events;
-    if(options){
-      this.config = options
-
-      if(!options.notTimed){
-        this.setupTimers()
-        this.setupListener()
-        this.currentBusesQuery({event: "current_buses"})
-      }
-    }
     //setup stops
     this.stops = _.reduce(this.config.buses, (object, bus)=>{
       object[bus] = require("./lib/reader")(this.config.stopsDataPath.replace("[bus]", bus))
@@ -29,20 +21,31 @@ class PublicBus{
     this.firstStops = _.map(this.stops, (stop)=> stop[1])
     this.currentBuses = [];
     this.apiKey = this.config.AccountKey
+
+    if(options){
+      if(!options.notTimed){
+        this.setupTimers()
+        this.setupListener()
+        this.currentBusesQuery({event: "current_stops"})
+      }
+    }
   }
   setupListener(){
     this.events.on("update_buses", this.updateBus.bind(this))
     this.events.on("add_buses", this.addBus.bind(this))
     this.events.on("first_stop", this.firstStopQuery.bind(this))
     this.events.on("next_stop", this.nextStopQuery.bind(this))
-    this.events.on("replace_all", this.replaceAll.bind(this))
+    this.events.on("current_stops", this.currentBusesQuery.bind(this))
+
+    this.events.on("clear_current", this.clearCurrent.bind(this))
   }
-  replaceAll(){
+  clearCurrent(){
     this.currentBuses = []
   }
   setupTimers(){
     require("./lib/cron")(this.events,"first_stop", this.config.firststop_cron)
     require("./lib/cron")(this.events,"next_stop", this.config.nextstop_cron)
+    require("./lib/cron")(this.events,"current_stops", this.config.currentstop_cron)
   }
   currentBusesQuery({event}){
     return Promise.map(Object.keys(this.stops), (service)=>{
@@ -50,7 +53,7 @@ class PublicBus{
     },{concurrency: 5})
     .then((stops)=> _.flatten(stops))
     .then((stops)=>{
-    extract(this, stops, this.events,event)
+      extract(this, stops, this.events,event)
       return stops
     })
   }
@@ -61,11 +64,12 @@ class PublicBus{
         busesNoOrigin.push(newBus)
       }else{
         var originalBusIndex = _.findIndex(this.currentBuses, (currentBus)=> currentBus['bus_id'] == newBus['originBus']['bus_id'])
-
         if(originalBusIndex == -1){
           delete newBus['originBus']
           busesNoOrigin.push(newBus)
         }else{
+          console.log("Bus ",newBus['originBus']['bus_id'],"from ", newBus['originBus']['StopIndex'], " -> ", newBus['StopIndex'], " time : ", newBus['originBus']['EstimatedArrival'], " -> ", newBus['EstimatedArrival'])
+
           newBus['bus_id'] = newBus['originBus']['bus_id']
 
           delete newBus['originBus']
@@ -89,9 +93,7 @@ class PublicBus{
     this.events.emit("added_buses", this.currentBuses)
   }
   firstStopQuery({event}){
-    return
-    this.query(this.firstStops)
-    .then((stops)=>{
+    return this.query(this.firstStops).then((stops)=>{
       extract(this, stops, this.events,event)
       return stops
     })
@@ -103,17 +105,21 @@ class PublicBus{
       var nextBusStop = this.stops[currentBus['ServiceNo']][currentBus['StopIndex'] + 1]
 
       currentBusStop['bus'] = currentBus
-      if(!nextBusStop){
-        return [currentBusStop]
+
+      if(!nextBusStop || !currentBusStop){
+        //last stop
+        if(currentBusStop['StopIndex'] == (this.stops[currentBus['ServiceNo']].length - 1)){
+          return []
+        }else{
+          return [currentBusStop]
+        }
       }else{
         nextBusStop['bus'] = currentBus
         return [currentBusStop, nextBusStop]
       }
     })
     stopsToFetch = _.flatten(stopsToFetch)
-    return
-    this.query(stopsToFetch)
-      .then((stops)=>{
+    return this.query(stopsToFetch).then((stops)=>{
         extract(this, stops, this.events,event)
         return stops
       })

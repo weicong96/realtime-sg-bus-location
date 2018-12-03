@@ -4,6 +4,6 @@ module.exports = {
  buses: [],
  firststop_cron: "*/20 * * * * *",
  nextstop_cron: "*/20 * * * * *",
- reset_cron: "*/3 * * * *",
+ currentstop_cron: "*/3 * * * *",
  stopsDataPath: "./exported_data/[bus]_busstops_raw.csv"
 }
