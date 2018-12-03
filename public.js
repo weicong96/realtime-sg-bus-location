@@ -7,6 +7,10 @@ const extract = require("./lib/extract");
 const fs = require("fs")
 class PublicBus{
   constructor(options, events){
+    if(!events){
+      var EventEmitter = require("events")
+      this.events = new EventEmitter()
+    }
     this.events = events;
     if(options){
       this.config = options
@@ -14,6 +18,7 @@ class PublicBus{
       if(!options.notTimed){
         this.setupTimers()
         this.setupListener()
+        this.currentBusesQuery({event: "current_buses"})
       }
     }
     //setup stops
@@ -26,8 +31,8 @@ class PublicBus{
     this.apiKey = this.config.AccountKey
   }
   setupListener(){
-    this.events.on("update_bus", this.updateBus.bind(this))
-    this.events.on("add_bus", this.addBus.bind(this))
+    this.events.on("update_buses", this.updateBus.bind(this))
+    this.events.on("add_buses", this.addBus.bind(this))
     this.events.on("first_stop", this.firstStopQuery.bind(this))
     this.events.on("next_stop", this.nextStopQuery.bind(this))
     this.events.on("replace_all", this.replaceAll.bind(this))
@@ -69,9 +74,9 @@ class PublicBus{
       }
     })
 
-    this.events.emit("updated_bus", this.currentBuses)
+    this.events.emit("updated_buses", this.currentBuses)
     if(busesNoOrigin.length > 0){
-      this.events.emit("add_bus", busesNoOrigin)
+      this.events.emit("add_buses", busesNoOrigin)
       this.events.emit("buses_no_origin", busesNoOrigin)
     }
   }
@@ -81,7 +86,7 @@ class PublicBus{
       newStop['bus_id'] = require('crypto').randomBytes(8).toString('hex')
       this.currentBuses.push(newStop)
     })
-    this.events.emit("added_bus", this.currentBuses)
+    this.events.emit("added_buses", this.currentBuses)
   }
   firstStopQuery({event}){
     return
