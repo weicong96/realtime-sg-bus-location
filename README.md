@@ -10,12 +10,15 @@ Currently, the Datamall API does not allow the querying of bus services based on
 - Fetches all stops on a given route, only performed on load currently
 - Pings BusArrivalv2 API on a configurable timely basis for 3 different purposes listed above
 - Events of different changes in code is broadcasted through the events property, which is an EventEmitter.
+- To use for any buses services in Singapore, save busstop information using the script at scripts/bus_route_stops_coordinates.py
 
 # In Progress
  - Complete test code
 
-# Requirements
-  - Obtain bus route from
+# Prerequisite before use
+  1. Generate busstops information using given script
+  2. Specify directory that the data is located in, under config.js
+  3. Specify other options for config.js, including AccountKey for LTA Datamall API
 
 # Usage
 ```
@@ -38,3 +41,6 @@ bus.events.on("added_buses", function(buses){
 |next_stop|Triggered by cron, query next stop status for all current buses|
 |current_stops|Triggered by cron, query all bus stops, will trigger clear_current|
 |clear_current|When current buses are refreshed but current buses is not empty|
+
+# Disclaimer
+As the accuracy of the data aggregrated is dependent on the Datamall API, the accuracy of the data presented may be affected by the accuracy of the data given. 
