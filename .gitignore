@@ -2,3 +2,5 @@ node_modules
 .nyc_output
 config.js
 campus.js
+exported_data
+*.log
