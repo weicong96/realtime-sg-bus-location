@@ -5,6 +5,20 @@ const http = require("axios")
 const time = require("./lib/cron")
 const extract = require("./lib/extract");
 const fs = require("fs")
+const winston = require("winston")
+const logger = winston.createLogger({
+  level: 'info',
+  transports: [
+    //
+    // - Write to all logs with level `info` and below to `combined.log`
+    // - Write all logs error (and below) to `error.log`.
+    //
+    new winston.transports.Console(),
+    new winston.transports.File({ filename: 'error.log', level: 'error' }),
+    new winston.transports.File({ filename: 'debug.log', level: 'debug' }),
+    new winston.transports.File({ filename: 'combined.log' })
+  ]
+})
 class PublicBus{
   constructor(options, events){
     this.config = options
@@ -68,7 +82,7 @@ class PublicBus{
           delete newBus['originBus']
           busesNoOrigin.push(newBus)
         }else{
-          console.log("Bus ",newBus['originBus']['bus_id'],"from ", newBus['originBus']['StopIndex'], " -> ", newBus['StopIndex'], " time : ", newBus['originBus']['EstimatedArrival'], " -> ", newBus['EstimatedArrival'])
+          logger.info("Bus ",newBus['originBus']['bus_id'],"from ", newBus['originBus']['StopIndex'], " -> ", newBus['StopIndex'], " time : ", newBus['originBus']['EstimatedArrival'], " -> ", newBus['EstimatedArrival'])
 
           newBus['bus_id'] = newBus['originBus']['bus_id']
 
