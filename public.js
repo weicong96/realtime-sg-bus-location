@@ -50,15 +50,10 @@ class PublicBus{
     this.events.on("first_stop", this.firstStopQuery.bind(this))
     this.events.on("next_stop", this.nextStopQuery.bind(this))
     this.events.on("current_stops", this.currentBusesQuery.bind(this))
-
-    this.events.on("clear_current", this.clearCurrent.bind(this))
-  }
-  clearCurrent(){
-    this.currentBuses = []
   }
   setupTimers(){
-    require("./lib/cron")(this.events,"first_stop", this.config.firststop_cron)
-    require("./lib/cron")(this.events,"next_stop", this.config.nextstop_cron)
+    //require("./lib/cron")(this.events,"first_stop", this.config.firststop_cron)
+    //require("./lib/cron")(this.events,"next_stop", this.config.nextstop_cron)
     require("./lib/cron")(this.events,"current_stops", this.config.currentstop_cron)
   }
   currentBusesQuery({event}){
@@ -72,17 +67,23 @@ class PublicBus{
     })
   }
   updateBus(newBuses){
+    //this is an update all, not a replace.
     var busesNoOrigin = [];
     _.forEach(newBuses, (newBus)=>{
       if(!newBus['originBus']){
-        busesNoOrigin.push(newBus)
+        var lookByStopIndex = _.findIndex(this.currentBuses, (currentBus)=>{
+          return (Math.abs(currentBus['StopIndex'] == newBus['StopIndex']) <= 2)
+        })
+        if(lookByStopIndex == -1){
+          busesNoOrigin.push(newBus)
+        }
       }else{
         var originalBusIndex = _.findIndex(this.currentBuses, (currentBus)=> currentBus['bus_id'] == newBus['originBus']['bus_id'])
         if(originalBusIndex == -1){
           delete newBus['originBus']
           busesNoOrigin.push(newBus)
         }else{
-          logger.info("Bus ",newBus['originBus']['bus_id'],"from ", newBus['originBus']['StopIndex'], " -> ", newBus['StopIndex'], " time : ", newBus['originBus']['EstimatedArrival'], " -> ", newBus['EstimatedArrival'])
+          logger.info("Bus "+newBus['originBus']['bus_id']+" from "+ newBus['originBus']['StopIndex'] + " -> " + newBus['StopIndex'] + " time : " + newBus['originBus']['EstimatedArrival']+  " -> "+ newBus['EstimatedArrival'])
 
           newBus['bus_id'] = newBus['originBus']['bus_id']
 
@@ -95,7 +96,6 @@ class PublicBus{
     this.events.emit("updated_buses", this.currentBuses)
     if(busesNoOrigin.length > 0){
       this.events.emit("add_buses", busesNoOrigin)
-      this.events.emit("buses_no_origin", busesNoOrigin)
     }
   }
   addBus(stops){
@@ -140,9 +140,6 @@ class PublicBus{
   }
   query(stops){
     return require("./lib/query")(stops,this.config)
-  }
-  on(_event, _function){
-    this.events.on(_event, _function)
   }
 }
 module.exports = PublicBus

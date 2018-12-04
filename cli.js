@@ -10,9 +10,10 @@ bus.events.on("updated_buses",function (buses) {
   buses.forEach((bus)=>{
     console.log("updated bus", bus['ServiceNo'], " at stop index : ", bus['StopIndex'])
   })
+  console.log(bus.currentBuses.length, " current buses")
 })
-bus.events.on("replace_all",function (buses) {
-  console.log("Replace all busstops",buses)
+bus.events.on("clear_current",function (buses) {
+  console.log("Replace all busstops")
 })
 bus.events.on("first_stop",function () {
   console.log("first stop executed")
