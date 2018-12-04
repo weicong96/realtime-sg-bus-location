@@ -62,7 +62,7 @@ class PublicBus{
     },{concurrency: 5})
     .then((stops)=> _.flatten(stops))
     .then((stops)=>{
-      extract(this, stops, this.events,event)
+      extract(this.currentBuses, stops, this.events,event)
       return stops
     })
   }
@@ -108,7 +108,7 @@ class PublicBus{
   }
   firstStopQuery({event}){
     return this.query(this.firstStops).then((stops)=>{
-      extract(this, stops, this.events,event)
+      extract(this.currentBuses, stops, this.events,event)
       return stops
     })
   }
@@ -134,9 +134,9 @@ class PublicBus{
     })
     stopsToFetch = _.flatten(stopsToFetch)
     return this.query(stopsToFetch).then((stops)=>{
-        extract(this, stops, this.events,event)
-        return stops
-      })
+      extract(this.currentBuses, stops, this.events,event)
+      return stops
+    })
   }
   query(stops){
     return require("./lib/query")(stops,this.config)
