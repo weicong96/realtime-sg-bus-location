@@ -52,8 +52,8 @@ class PublicBus{
     this.events.on("current_stops", this.currentBusesQuery.bind(this))
   }
   setupTimers(){
-    //require("./lib/cron")(this.events,"first_stop", this.config.firststop_cron)
-    //require("./lib/cron")(this.events,"next_stop", this.config.nextstop_cron)
+    require("./lib/cron")(this.events,"first_stop", this.config.firststop_cron)
+    require("./lib/cron")(this.events,"next_stop", this.config.nextstop_cron)
     require("./lib/cron")(this.events,"current_stops", this.config.currentstop_cron)
   }
   currentBusesQuery({event}){
