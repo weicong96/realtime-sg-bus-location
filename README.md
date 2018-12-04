@@ -11,6 +11,9 @@ Currently, the Datamall API does not allow the querying of bus services based on
 - Pings BusArrivalv2 API on a configurable timely basis for 3 different purposes listed above
 - Events of different changes in code is broadcasted through the events property, which is an EventEmitter.
 - To use for any buses services in Singapore, save busstop information using the script at scripts/bus_route_stops_coordinates.py
+# Scripts
+- bus_route_stops_coordinates.js fetches bus stop information from Datamall BusStops and BusRoutes API, produces a csv file of bus stop details for a given service
+- bus_route_line_coordinates.py fetches coordinate information of bus route from OneMap getOneBusRoute API, also merges them into a single coordinate.
 
 # In Progress
  - Complete test code
@@ -43,4 +46,4 @@ bus.events.on("added_buses", function(buses){
 |clear_current|When current buses are refreshed but current buses is not empty|
 
 # Disclaimer
-As the accuracy of the data aggregrated is dependent on the Datamall API, the accuracy of the data presented may be affected by the accuracy of the data given. 
+As the accuracy of the data aggregrated is dependent on the Datamall API, the accuracy of the data presented may be affected by the accuracy of the data given.

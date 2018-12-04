@@ -17,6 +17,7 @@
     "node-cron": "^2.0.3"
   },
   "devDependencies": {
+    "argparse": "^1.0.10",
     "axios-mock-adapter": "^1.15.0",
     "chai": "^4.2.0",
     "mocha": "^5.2.0",
