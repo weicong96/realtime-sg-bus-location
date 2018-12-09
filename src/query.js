@@ -1,11 +1,19 @@
 const Promise = require("bluebird")
 const http = require("axios")
 const _ = require("lodash")
-const time = require("./time")
-module.exports = function (stops, config) {
+const time = require("../lib/time")
+module.exports = function (stops, options) {
+  var AccountKey = options['AccountKey']
+  var api_url = options['api_url']
+  if(!AccountKey){
+    return Promise.reject({msg : "No AccountKey provided"})
+  }
+  if(!api_url){
+    return Promise.reject({msg: "No api url provided"})
+  }
   return (Promise.map(stops, (stop, index)=>{
     return http({
-      url: config.api_url+"BusArrivalv2",
+      url: api_url+"BusArrivalv2",
       method: "GET",
       params: {
         BusStopCode: stop['BusStopCode'],
@@ -13,9 +21,9 @@ module.exports = function (stops, config) {
       },
       headers: {
         "Content-Type": "application/json",
-        AccountKey: config.AccountKey
+        AccountKey: AccountKey
       }
-    }).then(function (response) {
+    }).then((response)=>{
       if(response && response.data.Services && response.data.Services.length > 0){
         var service = response.data.Services[0]
         var nextBus = service['NextBus']
@@ -23,6 +31,7 @@ module.exports = function (stops, config) {
         nextBus['ServiceNo'] = service['ServiceNo']
         nextBus['BusStopCode'] = stop['BusStopCode']
         if(stop['bus']){
+          console.log(stop, "ffff")
           nextBus['originBus'] = stop['bus']
         }
         delete nextBus['DestinationCode']
@@ -34,7 +43,7 @@ module.exports = function (stops, config) {
           return nextBus
         }
       }else{
-        return null
+        return []
       }
     })
   },  {concurrency : 3})
