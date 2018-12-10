@@ -3,4 +3,7 @@ node_modules
 config.js
 campus.js
 exported_data
-*.log
+error.log
+debug.log
+combined.log
+exported_data/*

@@ -15,11 +15,9 @@ Currently, the Datamall API does not allow the querying of bus services based on
 - bus_route_stops_coordinates.js fetches bus stop information from Datamall BusStops and BusRoutes API, produces a csv file of bus stop details for a given service
 - bus_route_line_coordinates.py fetches coordinate information of bus route from OneMap getOneBusRoute API, also merges them into a single coordinate.
 
-# In Progress
- - Complete test code
-
 # Prerequisite before use
   1. Generate busstops information using given script
+  2. Copy sample_config.js and rename it to config.js
   2. Specify directory that the data is located in, under config.js
   3. Specify other options for config.js, including AccountKey for LTA Datamall API
 
