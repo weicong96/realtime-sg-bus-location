@@ -6,10 +6,10 @@ module.exports = function (stops, options) {
   var AccountKey = options['AccountKey']
   var api_url = options['api_url']
   if(!AccountKey){
-    return Promise.reject({msg : "No AccountKey provided"})
+    return Promise.reject({error : "No AccountKey provided"})
   }
   if(!api_url){
-    return Promise.reject({msg: "No api url provided"})
+    return Promise.reject({error: "No api url provided"})
   }
   return (Promise.map(stops, (stop, index)=>{
     return http({
@@ -31,7 +31,6 @@ module.exports = function (stops, options) {
         nextBus['ServiceNo'] = service['ServiceNo']
         nextBus['BusStopCode'] = stop['BusStopCode']
         if(stop['bus']){
-          console.log(stop, "ffff")
           nextBus['originBus'] = stop['bus']
         }
         delete nextBus['DestinationCode']

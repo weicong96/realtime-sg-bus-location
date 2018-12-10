@@ -29,17 +29,54 @@ class PublicBus{
     }
   }
   setupListener(){
-    this.events.on("update_buses", this.updateBus.bind(this))
-    this.events.on("add_buses", this.addBus.bind(this))
+    require("./src/addBus")(this.events)
+    require("./src/updateBus")(this.events)
+
     this.events.on("first_stop", this.firstStopQuery.bind(this))
     this.events.on("next_stop", this.nextStopQuery.bind(this))
     this.events.on("current_stops", this.currentBusesQuery.bind(this))
+
+    this.events.on("add_buses", (e)=>{
+      if(!this.currentBuses){
+        this.currentBuses = []
+      }
+      this.currentBuses = _.concat(this.currentBuses, e)
+      this.events.emit("added_buses", e)
+    })
+    this.events.on("update_buses",(e)=>{
+      _.forEach(e, (change)=>{
+        this.currentBuses[change['index']] = change['newBus']
+      })
+      this.events.emit("updated_buses", _.map(e, (change)=> change['newBus']))
+      //console.log(this.currentBuses.length," is the current length after update bus")
+    })
   }
   setupTimers(){
     var cron = require("./lib/cron")
     cron(this.events,"first_stop", this.config.firststop_cron)
     cron(this.events,"next_stop", this.config.nextstop_cron)
     cron(this.events,"current_stops", this.config.currentstop_cron)
+
+  }
+
+  process(newBuses, event){
+    if(event == "current_stops"){
+      if(this.currentBuses.length > 0){
+        this.events.emit("buses_to_update", {newBuses, currentBuses: this.currentBuses})
+      }else{
+        this.events.emit("buses_to_add", {newBuses})
+      }
+    }else{
+      if(this.currentBuses.length == 0){
+        this.events.emit("buses_to_add", {newBuses: newBuses})
+      }else{
+        this.events.emit("buses_to_update", {newBuses, currentBuses: this.currentBuses})
+      }
+    }
+  }
+
+  query(stops){
+    return require("./src/query")(stops,this.config)
   }
   currentBusesQuery({event}){
     return Promise.map(Object.keys(this.stops), (service)=>{
@@ -57,7 +94,6 @@ class PublicBus{
       return stops
     })
   }
-
   nextStopQuery({event}){
     var stopsToFetch = _.map(this.currentBuses, (currentBus)=>{
       var currentBusStop = this.stops[currentBus['ServiceNo']][currentBus['StopIndex']]
@@ -80,40 +116,6 @@ class PublicBus{
       this.process(stops ,event)
       return stops
     })
-  }
-  updateBus(buses){
-    require("./src/updateBus")({
-      buses: buses,
-      events: this.events,
-      currentBuses: this.currentBuses
-    })
-  }
-  process(newBuses, originEvent){
-    if(originEvent == "current_stops"){
-      if(this.currentBuses.length > 0){
-        this.events.emit("update_buses", newBuses)
-      }else{
-        this.events.emit("add_buses", newBuses)
-      }
-    }else{
-      if(originEvent != "first_stop" && originEvent != "next_stop"){
-        this.events.emit("error", {msg : "ERROR: invalid event "+originEvent+" called extraction function"})
-      }else if(this.currentBuses.length == 0){
-        this.events.emit("add_buses", newBuses)
-      }else{
-        this.events.emit("update_buses", newBuses)
-      }
-    }
-  }
-  query(stops){
-    return require("./src/query")(stops,this.config)
-  }
-  addBus(buses){
-    this.currentBuses = _.concat(this.currentBuses, require("./src/addBus")({
-      events: this.events,
-      currentBuses: this.currentBuses,
-      buses: buses
-    }))
   }
 }
 module.exports = PublicBus

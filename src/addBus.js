@@ -1,12 +1,10 @@
 const _ = require("lodash")
-module.exports = ({buses, currentBuses, events})=>{
-  var addedBuses = []
-
-  _.forEach(buses, (bus)=>{
-    var newBus = JSON.parse(JSON.stringify(bus))
-    newBus['bus_id'] = require('crypto').randomBytes(8).toString('hex')
-    addedBuses.push(newBus)
+module.exports = (events)=>{
+  events.on("buses_to_add", (event)=>{
+    events.emit("add_buses", _.map(event['newBuses'], (bus)=>{
+      bus = JSON.parse(JSON.stringify(bus))
+      bus['bus_id'] =  require('crypto').randomBytes(8).toString('hex')
+      return bus
+    }))
   })
-  events.emit("added_buses", addedBuses)
-  return addedBuses
 }

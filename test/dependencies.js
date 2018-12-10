@@ -4,6 +4,7 @@ var EventEmitter = require("events");
 var sinon = require("sinon")
 describe("Test libraries",function () {
   describe("Test CSV Reader",function () {
+
     it("Expect file read to succeed with valid csv file",function () {
       var reader = require("../lib/reader")
       var contents = reader("./test/sample/sampleCsv.csv")
@@ -17,7 +18,7 @@ describe("Test libraries",function () {
       var reader = require("../lib/reader")
       var contents = reader("./test/sample/sampleCsv222.csv")
       expect(contents).to.be.not.null
-      expect(contents).to.be.instanceof(Error)
+      expect(Object.keys(contents)).to.be.have.members(["error"])
     })
   })
   describe("Test scheduler",function () {

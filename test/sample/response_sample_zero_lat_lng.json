@@ -1,0 +1,43 @@
+{
+  "odata.metadata": "http://datamall2.mytransport.sg/ltaodataservice/$metadata#BusArrivalv2/@Element",
+  "BusStopCode": "22519",
+  "Services": [
+    {
+      "ServiceNo": "179",
+      "Operator": "SBST",
+      "NextBus": {
+        "EstimatedArrival": "2018-12-03T15:49:12+08:00",
+        "Latitude": "0",
+        "Longitude": "0",
+        "Load": "SEA",
+        "Feature": "WAB",
+        "Type": "DD",
+        "StopIndex": 1,
+        "ServiceNo": "179",
+        "BusStopCode": "22519"
+      },
+      "NextBus2": {
+        "OriginCode": "22009",
+        "DestinationCode": "22009",
+        "EstimatedArrival": "2018-12-03T15:54:17+08:00",
+        "Latitude": "1.3433426666666666",
+        "Longitude": "103.6923635",
+        "VisitNumber": "1",
+        "Load": "SEA",
+        "Feature": "WAB",
+        "Type": "DD"
+      },
+      "NextBus3": {
+        "OriginCode": "22009",
+        "DestinationCode": "22009",
+        "EstimatedArrival": "2018-12-03T15:55:27+08:00",
+        "Latitude": "1.3439976666666666",
+        "Longitude": "103.6918725",
+        "VisitNumber": "1",
+        "Load": "SEA",
+        "Feature": "WAB",
+        "Type": "DD"
+      }
+    }
+  ]
+}

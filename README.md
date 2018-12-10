@@ -38,12 +38,11 @@ bus.events.on("added_buses", function(buses){
 
 |Event | When is event broadcasted |
 |------|-------------|
-|add_buses & added_buses| New bus on route|
-|update_buses & updated_buses| Previous bus has been updated in the journey|
+|added_buses| New bus on route|
+|updated_buses| Bus location is updated|
 |first_stop|Triggered by cron, query first stop status for new bus|
 |next_stop|Triggered by cron, query next stop status for all current buses|
 |current_stops|Triggered by cron, query all bus stops, will trigger clear_current|
-|clear_current|When current buses are refreshed but current buses is not empty|
 
 # Disclaimer
 As the accuracy of the data aggregrated is dependent on the Datamall API, the accuracy of the data presented may be affected by the accuracy of the data given.
