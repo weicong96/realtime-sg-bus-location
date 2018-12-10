@@ -8,6 +8,7 @@
     "test": "test"
   },
   "dependencies": {
+    "aws-sdk": "^2.373.0",
     "axios": "^0.18.0",
     "bluebird": "^3.5.3",
     "lodash": "^4.17.11",

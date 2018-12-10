@@ -2,10 +2,13 @@ var PublicBus = require("./public")
 var crawler = new PublicBus(require("./config"), require("./lib/event")())
 
 crawler.events.on("added_buses",function (buses) {
-  console.log(buses," new buses has appeared")
+  //console.log(buses," new buses has appeared")
+  require("./store").write(buses)
+
 })
 crawler.events.on("updated_buses",function (buses) {
-  console.log(buses, "buses updated")
+  //console.log(buses, "buses updated")
+  require("./store").write(buses)
 })
 crawler.events.on("first_stop",function () {
   console.log("Timed query for first stop status, to see if new bus is moving out")

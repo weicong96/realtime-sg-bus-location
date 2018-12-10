@@ -91,6 +91,7 @@ class PublicBus{
   firstStopQuery({event}){
     return this.query(this.firstStops).then((stops)=>{
       this.process(stops, event)
+      console.log(stops, "first stop")
       return stops
     })
   }
