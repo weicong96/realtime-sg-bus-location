@@ -24,23 +24,6 @@ function writeItem(items) {
 }
 module.exports = {
   write: (items)=>{
-    items = _.uniqBy(items, (item)=> item['bus_id'])
-    items = items.map(function (item) {
-      var expiry = time.moment()
-      expiry.add(30, "seconds")
-      return {
-        route_id : item['ServiceNo'],
-        bus_id: item['bus_id'],
-        lat: item['Latitude'],
-        lon: item['Longitude'],
-        last_updated : time.now(),
-        expiry: expiry.unix(),
-        time_arrive: time.parseFormat(item['EstimatedArrival'],"YYYY-MM-DDThh:mm:ss Z ZZ").unix(),
-        time_arrive_words: item['EstimatedArrival'],
-        stop_index: item['StopIndex'],
-        bus_stop_code: item['BusStopCode']
-      }
-    })
     var grouped = _.chunk(items, 25)
     writeItem.apply(null, grouped)
   }

@@ -34,17 +34,23 @@ module.exports = (events)=>{
         }else{
           //periodic follow
           newBus['bus_id'] = newBus['originBus']['bus_id']
+          var noChanges = newBus['originBus']['Latitude'] == newBus['Latitude'] && newBus['originBus']['Longtitude'] == newBus['Longtitude'] && newBus['originBus']['EstimatedArrival'] == newBus['EstimatedArrival']
           delete newBus['originBus']
-          updateBuses.push({
-            index : originalBusIndex,
-            newBus: newBus
-          })
+
+          if(!noChanges)
+            updateBuses.push({
+              index : originalBusIndex,
+              newBus: newBus
+            })
         }
       }
     })
+
     if(addBuses.length > 0){
       events.emit("buses_to_add", {newBuses: addBuses})
     }
-    events.emit("update_buses", updateBuses)
+    if(updateBuses.length > 0){
+      events.emit("update_buses", updateBuses)
+    }
   })
 }
