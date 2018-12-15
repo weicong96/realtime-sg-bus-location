@@ -1,6 +1,7 @@
 import requests
 import argparse
 import logging
+import json
 
 import polyline
 def decodePolyline(encodedtext):
@@ -26,10 +27,9 @@ def execute(buses, email, password, options):
         for key, stops in data.items():
             for stop in stops:
                 path = decodePolyline(stop['GEOMETRIES'])
-                stopCoordinates.append(str(path))
-            text = (','.join(stopCoordinates).replace("(", "[").replace(")", "]"))
+                stopCoordinates.append(path)
             f = open("./"+options.folder+"/route_"+bus+".json", "w")
-            f.write(text)
+            f.write(json.dumps(stopCoordinates))
 parser = argparse.ArgumentParser(description='Generates geojson route data for bus service  from OneMap')
 parser.add_argument("bus", help="Buses to get data for")
 parser.add_argument("email", help="Email for OneMap API Account")
