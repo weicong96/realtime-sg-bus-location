@@ -10,6 +10,7 @@ module.exports = (events)=>{
 
     var addBuses = []
     var updateBuses = []
+    console.log(newBuses, "buses")
     _.forEach(newBuses, (newBus)=>{
       //patching logic for periodic refresh
       if(!newBus['originBus']){
@@ -20,7 +21,7 @@ module.exports = (events)=>{
         if(minStopDiff <= 1){
           var index = _.findIndex(diffs, (diff)=>(diff == minStopDiff))
           newBus['originBus'] = currentBuses[index]
-          console.log("patched ", newBus['StopIndex'], currentBuses[index]['StopIndex'])
+          //console.log("patched ", newBus['StopIndex'], currentBuses[index]['StopIndex'])
         }
       }
       if(!newBus['originBus']){
