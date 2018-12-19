@@ -104,7 +104,7 @@ class PublicBus{
 
       if(!nextBusStop || !currentBusStop){
         //last stop
-        if(currentBusStop['StopIndex'] == (this.stops[currentBus['ServiceNo']].length - 1)){
+        if(currentBusStop['StopIndex'] >= (this.stops[currentBus['ServiceNo']].length - 1)){
           return []
         }
       }else{
